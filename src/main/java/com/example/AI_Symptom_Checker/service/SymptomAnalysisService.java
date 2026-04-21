@@ -9,8 +9,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,13 +22,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SymptomAnalysisService {
 
-    @Value("${openai.api.key}")
-    private String openAiApiKey;
+    @Value("${gemini.api.key}")
+    private String geminiApiKey;
 
-    @Value("${openai.api.url:https://api.openai.com/v1/chat/completions}")
-    private String openAiApiUrl;
+    @Value("${gemini.api.url:https://generativelanguage.googleapis.com/v1beta/models}")
+    private String geminiApiUrl;
 
-    @Value("${openai.model:gpt-4o-mini}")
+    @Value("${gemini.model:gemini-2.0-flash}")
     private String model;
 
     private final ObjectMapper objectMapper;
@@ -33,27 +36,28 @@ public class SymptomAnalysisService {
 
     public Mono<SymptomAnalysisResponse> analyzeSymptoms(SymptomAnalysisRequest request) {
         String prompt = buildPrompt(request);
-        
-        List<ChatMessage> messages = new ArrayList<>();
-        messages.add(new ChatMessage("system", getSystemPrompt()));
-        messages.add(new ChatMessage("user", prompt));
 
-        OpenAIRequest openAIRequest = new OpenAIRequest(
-            model,
-            messages,
-            0.7,
-            1500
+        GeminiRequest geminiRequest = new GeminiRequest(
+            List.of(new GeminiRequest.Content(List.of(new GeminiRequest.Part(getSystemPrompt() + "\n\n" + prompt))))
         );
 
+        String url = geminiApiUrl + "/" + model + ":generateContent";
+
         return webClient.post()
-            .uri(openAiApiUrl)
-            .header(HttpHeaders.AUTHORIZATION, "Bearer " + openAiApiKey)
+            .uri(url)
+            .header("x-goog-api-key", geminiApiKey)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-            .bodyValue(openAIRequest)
+            .bodyValue(geminiRequest)
             .retrieve()
-            .bodyToMono(OpenAIResponse.class)
+            .bodyToMono(GeminiResponse.class)
+            .retryWhen(Retry.backoff(3, Duration.ofSeconds(2))
+                .filter(e -> e instanceof WebClientResponseException.TooManyRequests)
+                .doBeforeRetry(signal -> log.warn("Rate limited by Gemini API, retrying... attempt {}", signal.totalRetries() + 1)))
             .map(this::parseAIResponse)
-            .doOnError(error -> log.error("Error calling OpenAI API: {}", error.getMessage()));
+            .onErrorResume(e -> {
+                log.error("Error calling Gemini API after retries: {}", e.getMessage());
+                return Mono.just(createFallbackResponse());
+            });
     }
 
     private String getSystemPrompt() {
@@ -106,13 +110,21 @@ Provide a preliminary assessment following medical safety guidelines.
         );
     }
 
-    private SymptomAnalysisResponse parseAIResponse(OpenAIResponse openAIResponse) {
+    private SymptomAnalysisResponse parseAIResponse(GeminiResponse geminiResponse) {
         try {
-            String content = openAIResponse.getChoices().get(0).getMessage().getContent();
+            String content = geminiResponse.getCandidates().get(0).getContent().getParts().get(0).getText();
             if (content.contains("```json")) {
-                content = content.substring(content.indexOf("```json") + 7, content.lastIndexOf("```"));
+                int start = content.indexOf("```json") + 7;
+                int end = content.indexOf("```", start);
+                if (end > start) {
+                    content = content.substring(start, end);
+                }
             } else if (content.contains("```")) {
-                content = content.substring(content.indexOf("```") + 3, content.lastIndexOf("```"));
+                int start = content.indexOf("```") + 3;
+                int end = content.indexOf("```", start);
+                if (end > start) {
+                    content = content.substring(start, end);
+                }
             }
             content = content.trim();
             
