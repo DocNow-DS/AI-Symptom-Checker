@@ -1,0 +1,145 @@
+{
+	"info": {
+		"_postman_id": "ai-symptom-checker",
+		"name": "AI Symptom Checker API",
+		"description": "API collection for AI-powered symptom analysis and doctor recommendations",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Health Check",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8085/api/symptom-checker/health",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "8085",
+					"path": ["api", "symptom-checker", "health"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "2. Analyze Symptoms - Headache & Fever",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"symptoms\": \"I have a severe headache and fever for the past 2 days. The headache is throbbing and located at the front of my head. I also feel very tired.\",\n    \"age\": \"28\",\n    \"gender\": \"male\",\n    \"duration\": \"2 days\",\n    \"severity\": \"moderate\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8085/api/symptom-checker/analyze",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "8085",
+					"path": ["api", "symptom-checker", "analyze"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3. Analyze Symptoms - Chest Pain",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"symptoms\": \"I have chest pain that radiates to my left arm. It started suddenly about an hour ago and feels like pressure. I'm also sweating and feel nauseous.\",\n    \"age\": \"55\",\n    \"gender\": \"male\",\n    \"duration\": \"1 hour\",\n    \"severity\": \"severe\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8085/api/symptom-checker/analyze",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "8085",
+					"path": ["api", "symptom-checker", "analyze"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "4. Analyze Symptoms - Stomach Issues",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"symptoms\": \"I've been having stomach pain and diarrhea for 3 days. The pain is cramping and I feel bloated. I also feel weak and dehydrated.\",\n    \"age\": \"32\",\n    \"gender\": \"female\",\n    \"duration\": \"3 days\",\n    \"severity\": \"moderate\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8085/api/symptom-checker/analyze",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "8085",
+					"path": ["api", "symptom-checker", "analyze"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "5. Analyze Symptoms - Skin Rash",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"symptoms\": \"I have a red, itchy rash on my arms and legs that appeared yesterday. It's spreading and getting more itchy. No fever but skin feels warm.\",\n    \"age\": \"24\",\n    \"gender\": \"female\",\n    \"duration\": \"1 day\",\n    \"severity\": \"mild\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8085/api/symptom-checker/analyze",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "8085",
+					"path": ["api", "symptom-checker", "analyze"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "6. Analyze Symptoms - Minimal Info",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"symptoms\": \"I have a sore throat and runny nose\",\n    \"age\": \"Not specified\",\n    \"gender\": \"Not specified\",\n    \"duration\": \"Not specified\",\n    \"severity\": \"moderate\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8085/api/symptom-checker/analyze",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "8085",
+					"path": ["api", "symptom-checker", "analyze"]
+				}
+			},
+			"response": []
+		}
+	]
+}
