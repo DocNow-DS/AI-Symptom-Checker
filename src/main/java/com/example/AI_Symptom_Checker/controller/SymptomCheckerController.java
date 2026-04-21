@@ -13,7 +13,7 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping("/api/symptom-checker")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.OPTIONS})
 public class SymptomCheckerController {
 
     private final SymptomAnalysisService symptomAnalysisService;
